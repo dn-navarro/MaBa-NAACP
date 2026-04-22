@@ -28,6 +28,10 @@ class demonstracao(Scene):
 # Demonstração para quem tem pressa
 class shorts(Scene):
 	def construct(self):
+		# Configura para celular na vertical -> mudamos de 16:9 para 9:16
+		self.camera.frame_width = 9		# largura - horizontal
+		self.camera.frame_height = 16	# comprimento - vertical
+		
 		# Funções:
 		g_x = lambda x: x**(1/2)
 		h_x = lambda x: (x-1)**(1/2)
@@ -35,7 +39,13 @@ class shorts(Scene):
 		
 		# Objetos:
 			# Plano cartesiano e rótulos de eixo
-		plano = Axes(x_range=[-2,10,1], y_range=[-2,5,1], axis_config={"include_numbers": True, "tip_shape": StealthTip})
+		plano = Axes(x_range=[-2,10,1], 
+			y_range=[-2,5,1], 
+			x_length=7,
+			y_length=4,
+			axis_config={"include_numbers": True, "tip_shape": StealthTip, "font_size":24})
+		plano.shift(DOWN)
+		
 		x_rotulo = plano.get_x_axis_label(MathTex("x"), edge=RIGHT, direction=RIGHT)
 		y_rotulo = plano.get_y_axis_label(MathTex("y"), edge=UP, direction=UP)
 		
@@ -45,33 +55,66 @@ class shorts(Scene):
 		h_plot = plano.plot(h_x, x_range=[1,10], color = ORANGE)
 		f_plot = plano.plot(f_x, x_range=[1,10], color = RED)
 		
-			# Rótulos (identificam as funções)
-		g_label = MathTex("g(x) = \\sqrt{x}").to_corner(DR, buff=1).set_color(YELLOW)
-		g_label_copia = g_label.copy()
-		h_label = MathTex("h(x) = \\sqrt{x - 1}").to_corner(DR, buff=1).set_color(ORANGE)
-		f_label = MathTex("f(x) = \\sqrt{x - 1} + 2").to_corner(DR, buff=1).set_color(RED)
+			# Pontos e retas no plano
+		g_dot = Dot(plano.coords_to_point(0,0), color=YELLOW)
+		g_dot_copia = g_dot.copy()
+		h_dot = Dot(plano.coords_to_point(1,0), color=ORANGE)
+		f_dot = Dot(plano.coords_to_point(1,2), color=RED)
 		
+		coordenadas00 = plano.get_lines_to_point(plano.coords_to_point(0,0))
+		coordenadas10 = plano.get_lines_to_point(plano.coords_to_point(1,0))
+		coordenadas12 = plano.get_lines_to_point(plano.coords_to_point(1,2))
+		
+			# Rótulos (identificam as funções)
+		g_label = MathTex("g(x) = \\sqrt{x}").set_color(YELLOW)
+		g_label_copia = g_label.copy()
+		h_label = MathTex("h(x) = \\sqrt{x - 1}").set_color(ORANGE)
+		f_label = MathTex("f(x) = \\sqrt{x - 1} + 2").set_color(RED)
+		
+			# Domínio (d_[funcao]) e Imagem (im_[funcao])
+		d_g = MathTex("D_g = \\left\\{ x \\in \\mathbb{R} \\, : \\, x \\geq 0 \\right\\}").set_color(YELLOW)
+		im_g = MathTex("Im_g = \\left\\{ y \\in \\mathbb{R} \\, : \\, y \\geq 0 \\right\\}").set_color(YELLOW)
+		d_g_copia = d_g.copy()
+		im_g_copia = im_g.copy()
+		d_h = MathTex("D_h = \\left\\{ x \\in \\mathbb{R} \\, : \\, x \\geq 1 \\right\\}").set_color(ORANGE)
+		im_h = MathTex("Im_h = \\left\\{ y \\in \\mathbb{R} \\, : \\, y \\geq 0 \\right\\}").set_color(ORANGE)
+		d_f = MathTex("D_f = \\left\\{ x \\in \\mathbb{R} \\, : \\, x \\geq 1 \\right\\}").set_color(RED)
+		im_f = MathTex("Im_f = \\left\\{ y \\in \\mathbb{R} \\, : \\, y \\geq 2 \\right\\}").set_color(RED)
+		
+			# Agrupamentos: gráficos, pontos ; rótulos, domínios e imagens das funções
+		g_grafico = VGroup(g_plot, g_dot, coordenadas00)
+		g_grafico_copia = g_grafico.copy()
+		h_grafico = VGroup(h_plot, h_dot, coordenadas10)
+		f_grafico = VGroup(f_plot, f_dot, coordenadas12)
+		
+		g_texto = VGroup(g_label, d_g, im_g).arrange(DOWN).to_edge(UP, buff=1).scale(0.7)
+		g_texto_copia = g_texto.copy()
+		h_texto = VGroup(h_label, d_h, im_h).arrange(DOWN).to_edge(UP, buff=1).scale(0.7)
+		f_texto = VGroup(f_label, d_f, im_f).arrange(DOWN).to_edge(UP, buff=1).scale(0.7)
+
 		# Animações:
 			# Parte 1:
 		self.play(Create(plano), Write(x_rotulo), Write(y_rotulo))
-		self.play(Create(g_plot), Write(g_label))
+		self.play(Create(g_grafico), Write(g_texto))
 		self.wait(3)
 		
 			# Parte 2: g -> h
-		self.play(ReplacementTransform(g_label, h_label))
-		self.play(ReplacementTransform(g_plot, h_plot))
+		self.play(ReplacementTransform(g_texto, h_texto))
+		self.play(ReplacementTransform(g_grafico, h_grafico))
 		self.wait(3)
 		
 			# Parte 3: h -> f
-		self.play(ReplacementTransform(h_label, f_label))
-		self.play(ReplacementTransform(h_plot, f_plot))
+		self.play(ReplacementTransform(h_texto, f_texto))
+		self.play(ReplacementTransform(h_grafico, f_grafico))
 		self.wait(3)
 		
 			# Parte 4: f -> g_copia. Confere um efeito de repetição
-		self.play(ReplacementTransform(f_label, g_label_copia))
-		self.play(ReplacementTransform(f_plot, g_plot_copia))
+		self.play(ReplacementTransform(f_texto, g_texto_copia))
+		self.play(ReplacementTransform(f_grafico, g_grafico_copia))
 		self.wait(3)
+
 
 # Notas
 # 1. Copiei a variável g_plot usando o método copy(). 
 # 	Quando fizemos a transformação g_plot -> h_plot, g_plot foi substituido!
+#	Ainda não descobri um jeito mais simples, rápido e econômico de resolver :-P
